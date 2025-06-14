@@ -4,10 +4,10 @@
     "version": "1.0.1",
     "manifest_version": 3,
     "icons": {
-        "16": "assets/logo/logo.png",
-        "32": "assets/logo/logo.png",
-        "48": "assets/logo/logo.png",
-        "128": "assets/logo/logo.png"
+        "16": "assets/logos/logo.png",
+        "32": "assets/logos/logo.png",
+        "48": "assets/logos/logo.png",
+        "128": "assets/logos/logo.png"
     },
     "permissions": [
         "webRequest",
@@ -23,15 +23,6 @@
     ],
     "background": {
         "service_worker": "background.js"
-    },
-    "action": {
-        "default_popup": "popup/index.html",
-        "default_icon": {
-            "16": "assets/logo/logo.png",
-            "32": "assets/logo/logo.png",
-            "48": "assets/logo/logo.png",
-            "128": "assets/logo/logo.png"
-        }
     },
     "content_scripts": [
         {

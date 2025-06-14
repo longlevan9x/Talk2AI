@@ -1,6 +1,7 @@
 
 let cachedBrowserInfo = null;
 let chatgptTabId = null;
+
 const BASE_CHATGPT_URL = "https://chatgpt.com";
 const CHATGPT_BACKEND_API_URL = BASE_CHATGPT_URL + "/backend-api";
 const LOCAL_STORAGE_PREFIX = {
@@ -35,7 +36,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         const headers = details.requestHeaders;
         // console.log("onBeforeSendHeaders", details)
 
-        if (details.initiator = BASE_CHATGPT_URL) {
+        if (details.initiator === BASE_CHATGPT_URL) {
             // if (details.url === `${BASE_CHATGPT_URL}/auth/logout`) {
             //     clearChatGptHeaders();
             // }
