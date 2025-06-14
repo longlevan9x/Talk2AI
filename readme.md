@@ -1,6 +1,6 @@
 
 
-#### [👉 Hướng dẫn cài đặt và Sử dụng Extension](#-talk2ai--chrome-extension)
+#### [👉 Hướng dẫn cài đặt và Sử dụng Extension](#-talk2ai--hướng-dẫn-cài-đặt-và-sử-dụng-extension)
 
 # 🚀 Hướng Dẫn Cài Đặt và Chạy Source Code Extension
 
