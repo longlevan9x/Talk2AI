@@ -1,8 +1,7 @@
 {
     "name": "Talk2AI – Effortless AI communication ",
-    "description": "Talk2AI lets you send content directly to powerful AI platforms like ChatGPT, Claude, or Gemini with a single click",
+    "description": "Talk2AI lets you send content directly to powerful AI platforms like ChatGPT, Claude, or Gemini with a single click.",
     "version": "1.0.1",
-    "default_locale": "en",
     "manifest_version": 3,
     "icons": {
         "16": "assets/logos/logo.png",
