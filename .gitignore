@@ -8,8 +8,8 @@ dist/*
 build/
 
 #Temp
-temp-release/
-temp-release/*
+temp_release/
+temp_release/*
 
 # Logs
 npm-debug.log*

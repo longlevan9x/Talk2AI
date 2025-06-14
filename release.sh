@@ -4,7 +4,7 @@ VERSION=$1
 TAG="v$VERSION"
 BRANCH_NAME="release/$TAG"
 DIST_DIR="dist"
-TEMP_DIR="temp-release"
+TEMP_DIR="temp_release"
 
 if [ -z "$VERSION" ]; then
   echo "❌ Bạn phải truyền vào version. Ví dụ: ./release.sh 1.0.1"
