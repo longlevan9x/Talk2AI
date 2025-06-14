@@ -25,6 +25,12 @@ fi
 REPO_URL=${REPO_URL%.git}
 REPO_URL=${REPO_URL/git@github.com:/https:\/\/github.com\/}
 
+TAG_EXISTS=$(git ls-remote --tags origin | grep "refs/tags/$TAG" || true)
+if [ -n "$TAG_EXISTS" ]; then
+  echo "⚠️ Tag $TAG đã tồn tại trên remote. Hủy release để tránh ghi đè."
+  exit 1
+fi
+
 echo "🔨 Build dự án..."
 npm run build || { echo "❌ Build thất bại"; exit 1; }
 
