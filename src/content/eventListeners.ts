@@ -1,5 +1,5 @@
+import { EVENT_ACTION, EVENT_TYPE } from "../constant";
 import { sendFromExtMessageToWebsite, generatePoWToken } from "./business";
-import { EVENT_TYPE, EVENT_ACTION } from "./enum";
 
 export const startContent = (version: string) => {
     window.addEventListener("message", (event) => {

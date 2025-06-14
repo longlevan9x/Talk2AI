@@ -1,4 +1,5 @@
-import { BASE_CHATGPT_URL, EVENT_TYPE, EVENT_ACTION } from "../constants/constant";
+import { EVENT_ACTION, EVENT_TYPE } from "../../constant";
+import { BASE_CHATGPT_URL } from "../constants/constant";
 import { sendConversation } from "./chatgpt";
 import { setCachedClientId } from "./globalState";
 import { setChatGptHeaders } from "./headers";

@@ -1,6 +1,6 @@
 import { sha3_512 } from "js-sha3";
+import { EVENT_TYPE } from "../constant";
 
-import { EVENT_TYPE } from "./enum";
 
 export function sendFromExtMessageToWebsite(action: string, payload?: any) {
   const data = {

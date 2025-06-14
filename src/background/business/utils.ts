@@ -1,4 +1,5 @@
-import { EVENT_TYPE, LOCAL_STORAGE_PREFIX } from "../constants/constant";
+import { EVENT_TYPE } from "../../constant";
+import { LOCAL_STORAGE_PREFIX } from "../constants/constant";
 
 export function generateUUIDv4Str(options: { random?: Uint8Array; rng?: () => Uint8Array } = {},
     offset = 0): string {

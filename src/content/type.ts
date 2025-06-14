@@ -1,4 +1,4 @@
-import { EVENT_ACTION, EVENT_TYPE } from "./enum";
+import { EVENT_TYPE, EVENT_ACTION } from "../constant";
 
 interface WindowEventData {
   type: EVENT_TYPE;
