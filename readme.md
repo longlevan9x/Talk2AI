@@ -41,8 +41,7 @@ Nếu lỗi vẫn tiếp tục xảy ra:
 
 ---
 
-📫 **Liên hệ phát triển**: [email@example.com] *(thay bằng email của bạn)*  
-🌐 **Phiên bản**: 1.0.0  
-📁 **Mã nguồn**: *(thêm link nếu bạn public repo)*
+📫 **Liên hệ phát triển**: [email@example.com]
+🌐 **Phiên bản**: 1.0.1  
 
 ---
