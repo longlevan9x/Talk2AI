@@ -79,7 +79,7 @@ Sau khi đã build (dev hoặc prod), bạn có thể test extension như sau:
 
 #
 
-# 🧠 Talk2AI – Hướng dẫn cài đặt và Sử dụng Extension[#huong-dan-su-dung]
+# 🧠 Talk2AI – Hướng dẫn cài đặt và Sử dụng Extension
 
 **Talk2AI** là một tiện ích Chrome giúp bạn gửi nội dung từ bất kỳ trang web nào đến các nền tảng AI như ChatGPT, Claude, Gemini... chỉ với một cú nhấp chuột.
 
