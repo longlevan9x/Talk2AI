@@ -1,3 +1,87 @@
+Hiểu rồi! Dưới đây là **toàn bộ nội dung bạn yêu cầu**, được viết sẵn hoàn chỉnh bằng **Markdown**, đúng cấu trúc và trình bày, để bạn **copy-paste trực tiếp vào `README.md`**:
+
+````markdown
+# 🚀 Hướng Dẫn Cài Đặt và Chạy Source Code Extension
+
+## 1. Cài Node.js và npm
+
+Để bắt đầu, bạn cần cài đặt:
+
+- **Node.js** (đề xuất phiên bản >= 18.x)
+- **npm** (được cài kèm với Node.js)
+
+👉 Tải về tại: https://nodejs.org/
+
+Sau khi cài xong, kiểm tra bằng cách chạy:
+
+```bash
+node -v
+npm -v
+````
+
+---
+
+## 2. Cài Dependencies
+
+Sau khi clone hoặc tải source code về, chạy lệnh sau để cài đặt các dependencies:
+
+```bash
+npm install
+```
+
+---
+
+## 3. Chạy Ứng Dụng Ở Chế Độ Phát Triển (Dev)
+
+Sử dụng lệnh sau để chạy ở chế độ phát triển:
+
+```bash
+npm run dev
+```
+
+* Lệnh này sẽ build mã nguồn và theo dõi thay đổi tự động.
+* File kết quả sẽ được xuất ra thư mục `dist/`.
+
+---
+
+## 4. Build Ứng Dụng Cho Production
+
+Khi bạn muốn build phiên bản production:
+
+```bash
+npm run build
+```
+
+* Lệnh này tạo bản build tối ưu và cũng xuất vào thư mục `dist/`.
+
+---
+
+## 5. Load Extension Từ Thư Mục `dist/` Để Test
+
+Sau khi đã build (dev hoặc prod), bạn có thể test extension như sau:
+
+1. Mở Chrome.
+2. Truy cập `chrome://extensions/`
+3. Bật **Developer mode** (góc trên bên phải).
+4. Nhấn **"Load unpacked"**.
+5. Chọn thư mục `dist/`.
+
+> ⚠️ Sau mỗi lần build lại, hãy **Reload** extension để thấy thay đổi mới nhất.
+
+---
+
+## ✅ Ghi chú
+
+* Mọi thay đổi code đều cần `npm run dev` (dev) hoặc `npm run build` (prod) để cập nhật thư mục `dist/`.
+* Nếu extension không hiển thị thay đổi, hãy chắc chắn bạn đã reload trong `chrome://extensions/`.
+
+```
+
+Nếu bạn muốn thêm phần mô tả project, cấu trúc thư mục, hoặc hướng dẫn đóng gói `.zip` để publish, mình có thể bổ sung thêm nhé.
+```
+
+
+
 # 🧠 Talk2AI – Chrome Extension
 
 **Talk2AI** là một tiện ích Chrome giúp bạn gửi nội dung từ bất kỳ trang web nào đến các nền tảng AI như ChatGPT, Claude, Gemini... chỉ với một cú nhấp chuột.
