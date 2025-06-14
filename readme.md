@@ -1,7 +1,6 @@
 
 
-## [Hướng Dẫn Cài Đặt và Chạy Source Code (Extension)](#-hướng-dẫn-cài-đặt-và-chạy-source-code-extension)
-## [Hướng dẫn cài đặt và Sử dụng Extension](#-talk2ai--chrome-extension)
+#### [👉 Hướng dẫn cài đặt và Sử dụng Extension](#-talk2ai--chrome-extension)
 
 # 🚀 Hướng Dẫn Cài Đặt và Chạy Source Code Extension
 
