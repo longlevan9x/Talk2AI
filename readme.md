@@ -1,6 +1,5 @@
-Hiểu rồi! Dưới đây là **toàn bộ nội dung bạn yêu cầu**, được viết sẵn hoàn chỉnh bằng **Markdown**, đúng cấu trúc và trình bày, để bạn **copy-paste trực tiếp vào `README.md`**:
 
-````markdown
+
 # 🚀 Hướng Dẫn Cài Đặt và Chạy Source Code Extension
 
 ## 1. Cài Node.js và npm
