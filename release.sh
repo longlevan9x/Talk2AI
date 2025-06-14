@@ -16,6 +16,15 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
+REPO_URL=$(git config --get remote.origin.url)
+if [ -z "$REPO_URL" ]; then
+  echo "❌ Không tìm thấy remote origin URL trong repo hiện tại."
+  exit 1
+fi
+
+REPO_URL=${REPO_URL%.git}
+REPO_URL=${REPO_URL/git@github.com:/https:\/\/github.com\/}
+
 echo "🔨 Build dự án..."
 npm run build || { echo "❌ Build thất bại"; exit 1; }
 
@@ -34,7 +43,7 @@ echo "$TAG" > "$TEMP_DIR/version.txt"
 cd "$TEMP_DIR"
 git init
 git checkout -b "$BRANCH_NAME"
-git remote add origin "$(git config --get remote.origin.url)"
+git remote add origin "$REPO_URL"
 
 git add .
 git commit -m "Release $TAG"
@@ -45,12 +54,11 @@ echo "📤 Đẩy branch $BRANCH_NAME và tag $TAG lên remote..."
 git push -f origin "$BRANCH_NAME"
 git push origin "$TAG"
 
+echo "🧹 Xóa branch release trên remote, chỉ giữ tag..."
+git push origin --delete "$BRANCH_NAME"
+
 cd ..
 rm -rf "$TEMP_DIR"
-
-REPO_URL=$(git config --get remote.origin.url)
-REPO_URL=${REPO_URL%.git}
-REPO_URL=${REPO_URL/git@github.com:/https:\/\/github.com\/}
 
 echo "✅ Đã tạo và đẩy nhánh $BRANCH_NAME, tag $TAG"
 echo "📤 Tạo GitHub Release tại:"
