@@ -2,7 +2,7 @@ import { EVENT_ACTION, EVENT_TYPE } from "../../constant";
 import { BASE_CHATGPT_URL } from "../constants/constant";
 import { sendConversation } from "./chatgpt";
 import { setCachedClientId } from "./globalState";
-import { setChatGptHeaders } from "./headers";
+import { clearChatGptHeaders, setChatGptHeaders } from "./headers";
 import { initClientId } from "./storage";
 
 export const startBackground = () => {
@@ -11,6 +11,10 @@ export const startBackground = () => {
             const headers = details.requestHeaders || [];
 
             if (details.initiator === BASE_CHATGPT_URL) {
+                if (details.url === `${BASE_CHATGPT_URL}/auth/logout`) {
+                    clearChatGptHeaders();
+                }
+
                 return setChatGptHeaders(headers);
             }
         },

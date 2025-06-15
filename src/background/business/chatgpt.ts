@@ -3,6 +3,7 @@ import { CHATGPT_BACKEND_API_URL, BASE_CHATGPT_URL } from "../constants/constant
 import { IGptHeaders, IChatPayload } from "../types/background";
 import { getBrowserInfo } from "./browserInfo";
 import { getChatgptTabId, setChatgptTabId } from "./globalState";
+import { chromeTabSendMessage } from "./sendMessage";
 import { getLocalStorageGptKeys, getClientId } from "./storage";
 import { generateUUIDv4Str, getSendMessageParams } from "./utils";
 
@@ -13,6 +14,9 @@ export async function sendConversation(message: any): Promise<any> {
 
         if (!stored.authorization || !stored.oaiClientVersion) {
             openOrFocusChatGPTTab();
+            chromeTabSendMessage(activeTab.id!, EVENT_ACTION.SSE_PART, { error: true, content: "Thiếu token. Hãy đăng nhập lại chatgpt." }).catch(err => {
+                console.log({ error: "Thiếu token hoặc headers. Đang mở ChatGPT để lấy lại...", err });
+            });
             return { error: "Thiếu token hoặc headers. Đang mở ChatGPT để lấy lại..." };
         }
 
@@ -90,10 +94,7 @@ export async function sendConversation(message: any): Promise<any> {
                 resJson = await conversationRes.json();
             }
 
-            chrome.tabs.sendMessage(activeTab.id!, getSendMessageParams({
-                action: EVENT_ACTION.SSE_PART,
-                content: resJson?.detail
-            })).catch((err) => {
+            chromeTabSendMessage(activeTab.id!, EVENT_ACTION.SSE_PART, { error: true, content: resJson?.detail }).catch((err) => {
                 console.log("SendMessage lỗi:", err);
             });
 
@@ -158,10 +159,7 @@ export async function sendConversation(message: any): Promise<any> {
                     if (delta) {
                         fullContent += delta;
 
-                        chrome.tabs.sendMessage(activeTab.id!, getSendMessageParams({
-                            action: EVENT_ACTION.SSE_PART,
-                            content: delta,
-                        })).catch((err) => {
+                        chromeTabSendMessage(activeTab.id!, EVENT_ACTION.SSE_PART, { content: delta }).catch(err => {
                             console.log("SendMessage lỗi:", err);
                         });
                     }
@@ -228,13 +226,12 @@ export function getProofToken(secret: string, difficulty: number): Promise<strin
     return new Promise((resolve) => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (tabs[0]?.id) {
-                chrome.tabs.sendMessage(tabs[0].id, {
-                    type: EVENT_TYPE.FROM_BG,
-                    action: EVENT_ACTION.GET_PROOF_TOKEN,
-                    params: [secret, difficulty]
-                }, (response) => {
+                chromeTabSendMessage(tabs[0].id, EVENT_ACTION.GET_PROOF_TOKEN, { params: [secret, difficulty] }).then(response => {
                     resolve(response);
-                });
+                }).catch(err => {
+                    console.log("getProofToken err", err);
+                    resolve("");
+                })
             } else {
                 resolve("");
             }
@@ -244,9 +241,10 @@ export function getProofToken(secret: string, difficulty: number): Promise<strin
 
 
 export function getRequestHeader(bearerToken: string): Record<string, string> {
-    if (!bearerToken.startsWith("Bearer ")) {
+    if (bearerToken && !bearerToken.startsWith("Bearer ")) {
         bearerToken = "Bearer " + bearerToken;
     }
+
     return {
         "Content-Type": "application/json",
         Authorization: `${bearerToken}`,

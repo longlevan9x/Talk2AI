@@ -1,8 +1,8 @@
 import { getSendMessageParams } from "./utils";
 
-export async function sendMessageFromBG(tabId: number, params: Record<string, any>): Promise<any> {
+export async function sendMessageFromBG(tabId: number, message: Record<string, any>): Promise<any> {
     return new Promise((resolve, reject) => {
-        chrome.tabs.sendMessage(tabId, getSendMessageParams(params), (response) => {
+        chrome.tabs.sendMessage(tabId, getSendMessageParams(message), (response) => {
             const err = chrome.runtime.lastError;
             if (err) {
                 reject(err);
@@ -11,4 +11,13 @@ export async function sendMessageFromBG(tabId: number, params: Record<string, an
             }
         });
     });
+}
+
+export function chromeTabSendMessage<M = any, R = any>(tabId: number, action: string, message: M): Promise<R> {
+    const _message = getSendMessageParams({
+        action: action,
+        ...message
+    });
+
+    return chrome.tabs.sendMessage(tabId!, _message);
 }

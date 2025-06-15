@@ -2,7 +2,7 @@ import { LOCAL_STORAGE_PREFIX } from "../constants/constant";
 import { headerNameToStorageKey, getChatGPTLocalStoragePrefixKey } from "./utils";
 
 export function clearChatGptHeaders(): void {
-    storageRemoveKeyPrefix(LOCAL_STORAGE_PREFIX.CHATGPT);
+    chrome.storage.local.set({[`${LOCAL_STORAGE_PREFIX.CHATGPT}_authorization`]: ""});
 }
 
 export function setChatGptHeaders(headers: chrome.webRequest.HttpHeader[]): { requestHeaders: chrome.webRequest.HttpHeader[] } {
@@ -13,7 +13,7 @@ export function setChatGptHeaders(headers: chrome.webRequest.HttpHeader[]): { re
         "oai-client-version",
         "user-agent",
         "accept-language",
-        "oai-language"
+        "oai-language",
         // "openai-sentinel-turnstile-token"
     ];
 
@@ -21,6 +21,7 @@ export function setChatGptHeaders(headers: chrome.webRequest.HttpHeader[]): { re
 
     headers.forEach(h => {
         const key = lowercased(h);
+
         if (wantedHeaders.includes(key) && h.value) {
             const storageKey = headerNameToStorageKey(h.name);
             dataToStore[getChatGPTLocalStoragePrefixKey(storageKey)] = h.value;
@@ -33,8 +34,3 @@ export function setChatGptHeaders(headers: chrome.webRequest.HttpHeader[]): { re
 
     return { requestHeaders: headers };
 }
-
-export function storageRemoveKeyPrefix(CHATGPT: any) {
-    throw new Error("Function not implemented.");
-}
-
