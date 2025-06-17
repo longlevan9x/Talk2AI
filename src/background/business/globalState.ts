@@ -7,6 +7,7 @@ let cachedClientId: string | null = null;
 export function getCachedBrowserInfo(): IBrowserInfo | null {
   return cachedBrowserInfo;
 }
+
 export function setCachedBrowserInfo(info: IBrowserInfo | null): void {
   cachedBrowserInfo = info;
 }
@@ -14,6 +15,7 @@ export function setCachedBrowserInfo(info: IBrowserInfo | null): void {
 export function getChatgptTabId(): number | null {
   return chatgptTabId;
 }
+
 export function setChatgptTabId(id: number | null): void {
   chatgptTabId = id;
 }

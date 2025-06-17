@@ -1,9 +1,7 @@
 export type ILocalStoragePrefix = {
     CHATGPT: string;
 };
-export type ILocalStorageKeys = {
-    GPT_CLIENT_ID: string;
-};
+
 export type IEventType = {
     FROM_BG: string;
     FROM_CONTENT: string;
@@ -42,6 +40,7 @@ export interface IChatPayload {
   timezone_offset_min: number;
   timezone: string;
   conversation_mode: { kind: string };
+  conversation_id?: string;
   enable_message_followups: boolean;
   system_hints: any[];
   supports_buffering: boolean;

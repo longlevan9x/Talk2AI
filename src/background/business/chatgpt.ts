@@ -1,11 +1,11 @@
-import { EVENT_ACTION, EVENT_TYPE } from "../../constant";
-import { CHATGPT_BACKEND_API_URL, BASE_CHATGPT_URL } from "../constants/constant";
+import { EVENT_ACTION } from "../../constant";
+import { CHATGPT_BACKEND_API_URL, BASE_CHATGPT_URL, LOCAL_STORAGE_KEYS } from "../constants/constant";
 import { IGptHeaders, IChatPayload } from "../types/background";
 import { getBrowserInfo } from "./browserInfo";
 import { getChatgptTabId, setChatgptTabId } from "./globalState";
 import { chromeTabSendMessage } from "./sendMessage";
-import { getLocalStorageGptKeys, getClientId } from "./storage";
-import { generateUUIDv4Str, getSendMessageParams } from "./utils";
+import { getLocalStorageGptKeys, getClientId, setLocalStorageGpt, setLocalStorageGptSplit } from "./storage";
+import { generateUUIDv4Str } from "./utils";
 
 export async function sendConversation(message: any): Promise<any> {
     try {
@@ -20,12 +20,27 @@ export async function sendConversation(message: any): Promise<any> {
             return { error: "Thiếu token hoặc headers. Đang mở ChatGPT để lấy lại..." };
         }
 
+
+        let conversationId = stored.conversation_id || null;
+        let currentMessageId = stored.current_message_id || "client-created-root";
+        let messageCount = stored.message_count ? parseInt(stored.message_count) : 0;
+
+        // max message in conversation = 10
+        if (messageCount > 10) {
+            // new conversation, new message
+            conversationId = null;
+            messageCount = 0;
+            currentMessageId = "client-created-root"
+        }
+
         const newMessageId = generateUUIDv4Str();
         const rawHeaders = getRequestHeader(stored.authorization);
         const headers: IGptHeaders = { ...rawHeaders, "Accept": "text/event-stream" };
         headers["oai-client-version"] = stored.oaiClientVersion;
+
         if (stored.userAgent) headers["User-Agent"] = stored.userAgent;
         if (stored.oaiLanguage) headers["oai-language"] = stored.oaiLanguage;
+
         headers["oai-device-id"] = await getClientId();
 
         const chatRequirementsToken = await postChatRequirements(headers);
@@ -53,10 +68,11 @@ export async function sendConversation(message: any): Promise<any> {
                     }
                 }
             ],
-            parent_message_id: "client-created-root",
+            parent_message_id: currentMessageId,
             model: "auto",
             timezone_offset_min: new Date().getTimezoneOffset(),
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            conversation_id: conversationId,
             conversation_mode: { kind: "primary_assistant" },
             enable_message_followups: true,
             system_hints: [],
@@ -94,12 +110,15 @@ export async function sendConversation(message: any): Promise<any> {
                 resJson = await conversationRes.json();
             }
 
-            chromeTabSendMessage(activeTab.id!, EVENT_ACTION.SSE_PART, { error: true, content: resJson?.detail }).catch((err) => {
+            chromeTabSendMessage(activeTab.id!, EVENT_ACTION.SSE_PART, { error: true, content: resJson?.detail?.message || resJson?.detail }).catch((err) => {
                 console.log("SendMessage lỗi:", err);
             });
 
             return { success: false, error: resJson };
         }
+
+        messageCount += 1;
+        setLocalStorageGptSplit(LOCAL_STORAGE_KEYS.MESSAGE_COUNT, messageCount);
 
         const reader = conversationRes.body!.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -137,6 +156,14 @@ export async function sendConversation(message: any): Promise<any> {
 
                 try {
                     const json = JSON.parse(dataStr);
+
+                    if (json.v?.conversation_id) {
+                        setLocalStorageGpt({ [LOCAL_STORAGE_KEYS.CONVERSATION_ID]: json.v.conversation_id })
+                    }
+
+                    if (json.v?.message?.id) {
+                        setLocalStorageGpt({ [LOCAL_STORAGE_KEYS.CURRENT_MESSAGE_ID]: json.v.message.id });
+                    }
 
                     if (json.v?.message?.author?.role === "user") {
                         continue;

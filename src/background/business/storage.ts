@@ -68,3 +68,17 @@ export async function initClientId(): Promise<string> {
         throw err;
     }
 }
+
+export function setLocalStorageGpt(items: { [key: string]: any }) {
+    const _items: any = {};
+    for (const key in items) {
+        const element = items[key];
+        _items[getChatGPTLocalStoragePrefixKey(key)] = element;
+    }
+
+    chrome.storage.local.set(_items);
+}
+
+export function setLocalStorageGptSplit(key: string, value: any) {
+    setLocalStorageGpt({ [key]: value });
+}
