@@ -13,6 +13,12 @@ export const startContent = (version: string) => {
                 chrome.runtime.sendMessage(
                     { type: EVENT_TYPE.FROM_CONTENT, action: EVENT_ACTION.SEND_PROMPT, prompt: event.data.payload.prompt },
                     (response) => {
+                        if (response.error) {
+                            // console.error("Error from background:", response.error);
+                            sendFromExtMessageToWebsite(EVENT_ACTION.GPT_STREAM_PART, { error: true, content: response.error });
+                            return;
+                        }
+
                         if (chrome.runtime.lastError) {
                             sendFromExtMessageToWebsite(EVENT_ACTION.EXT_LOST_CONNECTION);
                         } else {

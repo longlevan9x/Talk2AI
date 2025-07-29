@@ -215,6 +215,22 @@ export async function postChatRequirements(headers: Record<string, string>) {
         })
     });
 
+    if (!response.ok) {
+        // Nếu không thành công, trả về object chứa thông tin lỗi
+        let errorDetail = null;
+        try {
+            errorDetail = await response.json();
+            if (errorDetail?.detail) {
+                errorDetail = errorDetail.detail;
+            }
+
+        } catch {
+            errorDetail = await response.text();
+        }
+
+        throw new Error(errorDetail || "Failed to fetch chat requirements");
+    }
+
     return response.json();
 }
 
