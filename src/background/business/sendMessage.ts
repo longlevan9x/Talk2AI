@@ -1,4 +1,4 @@
-import { getSendMessageParams } from "./utils";
+import { getSendMessageParams } from "../utils/utils";
 
 export async function sendMessageFromBG(tabId: number, message: Record<string, any>): Promise<any> {
     return new Promise((resolve, reject) => {

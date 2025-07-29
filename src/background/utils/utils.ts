@@ -72,14 +72,14 @@ export function getSendMessageParams(params: Record<string, any>): Record<string
     return { type: EVENT_TYPE.FROM_BG, ...params };
 }
 
-
-
 export function gptConvertStorageKey(key: string): string {
     return key.replace(`${LOCAL_STORAGE_PREFIX.CHATGPT}_`, "");
 }
 
-
-
 export function getChatGPTLocalStoragePrefixKey(key: string): string {
     return `${LOCAL_STORAGE_PREFIX.CHATGPT}_${key}`;
+}
+
+export function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

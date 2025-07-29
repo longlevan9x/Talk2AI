@@ -1,4 +1,4 @@
-import { startContent } from "./content/eventListeners";
+import { startContent } from "./eventListeners";
 
 console.log("Content script loaded");
 const manifest = chrome.runtime.getManifest();

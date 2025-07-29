@@ -10,8 +10,8 @@ module.exports = (env, argv) => {
     devtool: isProd ? false : 'inline-source-map',
 
     entry: {
-      background: path.resolve(__dirname, 'src/background.ts'),
-      content: path.resolve(__dirname, 'src/content.ts'),
+      background: path.resolve(__dirname, 'src/background/index.ts'),
+      content: path.resolve(__dirname, 'src/content/index.ts'),
       popup: path.resolve(__dirname, 'src/popup/index.tsx'),
     },
 

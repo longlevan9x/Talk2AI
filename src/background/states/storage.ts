@@ -1,6 +1,6 @@
 import { LOCAL_STORAGE_PREFIX, LOCAL_STORAGE_KEYS } from "../constants/constant";
 import { IStorageItems } from "../types/background";
-import { gptConvertStorageKey, getChatGPTLocalStoragePrefixKey, generateUUIDv4Str } from "./utils";
+import { gptConvertStorageKey, getChatGPTLocalStoragePrefixKey, generateUUIDv4Str } from "../utils/utils";
 
 export async function getLocalStorageGptKeys(): Promise<Record<string, any>> {
     const items: IStorageItems = await getLocalStorageSync(null);

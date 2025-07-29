@@ -1,7 +1,7 @@
 import { EVENT_ACTION } from "../../constant";
 import { IBrowserInfo } from "../types/background";
-import { getCachedBrowserInfo, setCachedBrowserInfo } from "./globalState";
-import { getSendMessageParams } from "./utils";
+import { getCachedBrowserInfo, setCachedBrowserInfo } from "../states/globalState";
+import { getSendMessageParams } from "../utils/utils";
 
 export async function getBrowserInfo(): Promise<IBrowserInfo> {
     let cachedBrowserInfo = getCachedBrowserInfo();

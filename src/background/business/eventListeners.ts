@@ -1,9 +1,9 @@
 import { EVENT_ACTION, EVENT_TYPE } from "../../constant";
 import { BASE_CHATGPT_URL } from "../constants/constant";
-import { sendConversation } from "./chatgpt";
-import { setCachedClientId } from "./globalState";
-import { clearChatGptHeaders, setChatGptHeaders } from "./headers";
-import { initClientId } from "./storage";
+import { sendConversation } from "../chatgpt/chatgpt";
+import { setCachedClientId } from "../states/globalState";
+import { clearChatGptHeaders, setChatGptHeaders } from "../helpers/headers";
+import { initClientId } from "../states/storage";
 
 export const startBackground = () => {
     chrome.webRequest.onBeforeSendHeaders.addListener(

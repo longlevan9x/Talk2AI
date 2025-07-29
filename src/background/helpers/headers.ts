@@ -1,5 +1,5 @@
 import { LOCAL_STORAGE_PREFIX } from "../constants/constant";
-import { headerNameToStorageKey, getChatGPTLocalStoragePrefixKey } from "./utils";
+import { headerNameToStorageKey, getChatGPTLocalStoragePrefixKey } from "../utils/utils";
 
 export function clearChatGptHeaders(): void {
     chrome.storage.local.set({[`${LOCAL_STORAGE_PREFIX.CHATGPT}_authorization`]: ""});

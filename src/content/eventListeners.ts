@@ -16,7 +16,7 @@ export const startContent = (version: string) => {
                         if (chrome.runtime.lastError) {
                             sendFromExtMessageToWebsite(EVENT_ACTION.EXT_LOST_CONNECTION);
                         } else {
-                            console.log("Phản hồi từ background:", response);
+                            // console.log("Phản hồi từ background:", response);
                         }
                     }
                 );
