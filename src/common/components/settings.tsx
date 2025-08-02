@@ -174,13 +174,13 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                     <div className="space-y-4">
                         <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                             <div className="flex-1 mr-4">
-                                <label className="block font-medium text-gray-900 dark:text-gray-200 mb-1">Chế độ giao diện</label>
-                                <span className="text-xs text-gray-600 dark:text-gray-400">Chọn chế độ hiển thị giao diện</span>
+                                <label className="text-base block font-medium text-gray-900 dark:text-gray-200 mb-1">Chế độ giao diện</label>
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Chọn chế độ hiển thị giao diện</span>
                             </div>
                             <select
                                 value={tempSettings.theme}
                                 onChange={(e) => handleStringChange('theme', e.target.value)}
-                                className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-xs text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xs text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
                             >
                                 <option value="light">Sáng</option>
                                 <option value="dark">Tối</option>
@@ -199,10 +199,10 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                     <div className="space-y-4">
                         <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                             <div className="flex-1 mr-4">
-                                <label className="block font-medium text-gray-900 dark:text-gray-200 mb-1">Tách cuộc hội thoại</label>
-                                <span className="text-xs text-gray-600 dark:text-gray-400">Tách thành nhiều cuộc hội thoại</span>
+                                <label className="text-base block font-medium text-gray-900 dark:text-gray-200 mb-1">Tách cuộc hội thoại</label>
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Tách thành nhiều cuộc hội thoại</span>
                             </div>
-                            <label className="toggle-switch">
+                            <label className="toggle-switch toggle-switch-lg">
                                 <input
                                     type="checkbox"
                                     checked={tempSettings.splitConversation}
@@ -216,8 +216,8 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                             <>
                                 <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                                     <div className="flex-1 mr-4">
-                                        <label className="block font-medium text-gray-900 dark:text-gray-200 mb-1">Số lượng tin nhắn</label>
-                                        <span className="text-xs text-gray-600 dark:text-gray-400">Số lượng tin nhắn tối đa trong hội thoại</span>
+                                        <label className="text-base block font-medium text-gray-900 dark:text-gray-200 mb-1">Số lượng tin nhắn</label>
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">Số lượng tin nhắn tối đa trong hội thoại</span>
                                     </div>
                                     <input
                                         type="number"
@@ -225,16 +225,16 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                                         max="100"
                                         value={tempSettings.messageCount}
                                         onChange={(e) => handleNumberChange('messageCount', parseInt(e.target.value) || 1)}
-                                        className="w-20 px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-xs text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                                        className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xs text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
                                     />
                                 </div>
 
                                 <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                                     <div className="flex-1 mr-4">
-                                        <label className="block font-medium text-gray-900 dark:text-gray-200 mb-1">Xóa hội thoại khi đạt giới hạn</label>
-                                        <span className="text-xs text-gray-600 dark:text-gray-400">Tự động xóa hội thoại cũ khi đạt số tin nhắn tối đa</span>
+                                        <label className="text-base block font-medium text-gray-900 dark:text-gray-200 mb-1">Xóa hội thoại khi đạt giới hạn</label>
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">Tự động xóa hội thoại cũ khi đạt số tin nhắn tối đa</span>
                                     </div>
-                                    <label className="toggle-switch">
+                                    <label className="toggle-switch toggle-switch-lg">
                                         <input
                                             type="checkbox"
                                             checked={tempSettings.deleteConversation}
@@ -259,8 +259,8 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                                         <div className="flex-1 mr-4">
-                                            <label className="block font-medium text-gray-900 dark:text-gray-200 mb-1">Số tin nhắn</label>
-                                            <span className="text-xs text-gray-600 dark:text-gray-400">Số lượng tin nhắn tối đa trong hội thoại</span>
+                                            <label className="text-base block font-medium text-gray-900 dark:text-gray-200 mb-1">Số tin nhắn</label>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">Số lượng tin nhắn tối đa trong hội thoại</span>
                                         </div>
                                         <input
                                             type="number"
@@ -268,16 +268,16 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                                             max="50"
                                             value={tempSettings.explainMessageCount}
                                             onChange={(e) => handleNumberChange('explainMessageCount', parseInt(e.target.value) || 1)}
-                                            className="w-20 px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-xs text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                                            className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xs text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
                                         />
                                     </div>
 
                                     <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                                         <div className="flex-1 mr-4">
-                                            <label className="block font-medium text-gray-900 dark:text-gray-200 mb-1">Xóa hội thoại khi đạt giới hạn</label>
-                                            <span className="text-xs text-gray-600 dark:text-gray-400">Tự động xóa hội thoại cũ khi đạt số tin nhắn tối đa</span>
+                                            <label className="text-base block font-medium text-gray-900 dark:text-gray-200 mb-1">Xóa hội thoại khi đạt giới hạn</label>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">Tự động xóa hội thoại cũ khi đạt số tin nhắn tối đa</span>
                                         </div>
-                                        <label className="toggle-switch">
+                                        <label className="toggle-switch toggle-switch-lg">
                                             <input
                                                 type="checkbox"
                                                 checked={tempSettings.deleteExplainConversation}
@@ -297,8 +297,8 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                                         <div className="flex-1 mr-4">
-                                            <label className="block font-medium text-gray-900 dark:text-gray-200 mb-1">Số tin nhắn</label>
-                                            <span className="text-xs text-gray-600 dark:text-gray-400">Số lượng tin nhắn tối đa trong hội thoại</span>
+                                            <label className="text-base block font-medium text-gray-900 dark:text-gray-200 mb-1">Số tin nhắn</label>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">Số lượng tin nhắn tối đa trong hội thoại</span>
                                         </div>
                                         <input
                                             type="number"
@@ -306,16 +306,16 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                                             max="50"
                                             value={tempSettings.translateMessageCount}
                                             onChange={(e) => handleNumberChange('translateMessageCount', parseInt(e.target.value) || 1)}
-                                            className="w-20 px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-xs text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                                            className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xs text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
                                         />
                                     </div>
 
                                     <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                                         <div className="flex-1 mr-4">
-                                            <label className="block font-medium text-gray-900 dark:text-gray-200 mb-1">Xóa hội thoại khi đạt giới hạn</label>
-                                            <span className="text-xs text-gray-600 dark:text-gray-400">Tự động xóa hội thoại cũ khi đạt số tin nhắn tối đa</span>
+                                            <label className="text-base block font-medium text-gray-900 dark:text-gray-200 mb-1">Xóa hội thoại khi đạt giới hạn</label>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">Tự động xóa hội thoại cũ khi đạt số tin nhắn tối đa</span>
                                         </div>
-                                        <label className="toggle-switch">
+                                        <label className="toggle-switch toggle-switch-lg">
                                             <input
                                                 type="checkbox"
                                                 checked={tempSettings.deleteTranConversation}
