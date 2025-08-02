@@ -1,5 +1,4 @@
-import { EVENT_ACTION } from "../../constant";
-import { CHATGPT_BACKEND_API_URL, BASE_CHATGPT_URL, LOCAL_STORAGE_KEYS } from "../constants/constant";
+import { BASE_CHATGPT_URL, CHATGPT_BACKEND_API_URL, EVENT_ACTION, LOCAL_STORAGE_KEYS } from "../../common/constant";
 import { IGptHeaders, IChatPayload, IBrowserInfo } from "../types/background";
 import { getBrowserInfo } from "../business/browserInfo";
 import { getChatgptTabId, setChatgptTabId } from "../states/globalState";

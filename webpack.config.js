@@ -1,6 +1,7 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = (env, argv) => {
   const isProd = argv.mode === 'production';
@@ -13,12 +14,13 @@ module.exports = (env, argv) => {
       background: path.resolve(__dirname, 'src/background/index.ts'),
       content: path.resolve(__dirname, 'src/content/index.ts'),
       popup: path.resolve(__dirname, 'src/popup/index.tsx'),
+      settings: path.resolve(__dirname, 'src/pages/settings/index.tsx'),
     },
 
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: '[name].js',
-      clean: true, // xóa file cũ mỗi lần build
+      clean: true,
     },
 
     resolve: {
@@ -32,6 +34,23 @@ module.exports = (env, argv) => {
           use: 'ts-loader',
           exclude: /node_modules/,
         },
+        {
+          test: /\.(scss|sass)$/,
+          use: [
+            MiniCssExtractPlugin.loader,
+            'css-loader',
+            'postcss-loader',
+            'sass-loader',
+          ],
+        },
+        {
+          test: /\.css$/,
+          use: [
+            MiniCssExtractPlugin.loader,
+            'css-loader',
+            'postcss-loader',
+          ],
+        },
       ],
     },
 
@@ -40,8 +59,12 @@ module.exports = (env, argv) => {
         patterns: [
           { from: 'manifest.json', to: '.' },
           { from: 'src/popup/index.html', to: 'popup/index.html' },
+          { from: 'src/pages/settings/index.html', to: 'settings/index.html' },
           { from: 'assets/logo', to: 'assets/logo' },
         ],
+      }),
+      new MiniCssExtractPlugin({
+        filename: 'styles.css',
       }),
     ],
 

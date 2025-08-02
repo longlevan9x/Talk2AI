@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_PREFIX, LOCAL_STORAGE_KEYS } from "../constants/constant";
+import { LOCAL_STORAGE_PREFIX, LOCAL_STORAGE_KEYS } from "../../common/constant";
 import { IStorageItems } from "../types/background";
 import { gptConvertStorageKey, getChatGPTLocalStoragePrefixKey, generateUUIDv4Str } from "../utils/utils";
 

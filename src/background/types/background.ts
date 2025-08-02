@@ -1,7 +1,3 @@
-export type ILocalStoragePrefix = {
-  CHATGPT: string;
-};
-
 export type IEventType = {
   FROM_BG: string;
   FROM_CONTENT: string;

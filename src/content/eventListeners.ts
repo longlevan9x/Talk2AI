@@ -1,4 +1,4 @@
-import { EVENT_ACTION, EVENT_TYPE } from "../constant";
+import { EVENT_ACTION, EVENT_TYPE } from "../common/constant";
 import { sendFromExtMessageToWebsite, generatePoWToken } from "./business";
 
 export const startContent = (version: string) => {

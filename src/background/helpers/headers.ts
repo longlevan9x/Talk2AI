@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_PREFIX } from "../constants/constant";
+import { LOCAL_STORAGE_PREFIX } from "../../common/constant";
 import { headerNameToStorageKey, getChatGPTLocalStoragePrefixKey } from "../utils/utils";
 
 export function clearChatGptHeaders(): void {

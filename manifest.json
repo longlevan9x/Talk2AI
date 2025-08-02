@@ -33,6 +33,7 @@
             "128": "assets/logo/logo.png"
         }
     },
+    "options_page": "settings/index.html",
     "content_scripts": [
         {
             "matches": [

@@ -1,0 +1,154 @@
+@use "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+// Variables
+$toggle-height: 1.5rem;
+$toggle-width: 2.75rem;
+$toggle-circle-size: 1rem;
+$toggle-transition: all 0.3s ease;
+
+$color-gray: #9ca3af;
+$color-gray-hover: #6b7280;
+$color-green: #10b981;
+$color-green-hover: #059669;
+$color-white: #ffffff;
+$color-blue: #3b82f6;
+
+// Mixins
+@mixin gradient($left-color, $right-color) {
+  background: linear-gradient(to right, $left-color 50%, $right-color 50%);
+}
+
+@mixin toggle-circle {
+  position: absolute;
+  left: 0.25rem;
+  top: 0.25rem;
+  height: $toggle-circle-size;
+  width: $toggle-circle-size;
+  border-radius: 50%;
+  background-color: $color-white;
+  transition: $toggle-transition;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@mixin toggle-slider {
+  position: absolute;
+  height: $toggle-height;
+  width: $toggle-width;
+  border-radius: 9999px;
+  transition: $toggle-transition;
+}
+
+// Toggle Switch Component
+.toggle-switch {
+  @apply relative inline-flex items-center rounded-full transition-colors;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  cursor: pointer;
+  height: $toggle-height;
+  width: $toggle-width;
+
+  input {
+    @apply sr-only;
+  }
+
+  .slider {
+    @include toggle-slider;
+    @apply bg-gray-200 dark:bg-gray-600;
+  }
+
+  .slider::before {
+    @include toggle-circle;
+    content: '';
+  }
+
+  // OFF state
+  input:not(:checked) + .slider {
+    @apply bg-gray-200 dark:bg-gray-600;
+    
+    &::before {
+      transform: translateX(0);
+    }
+  }
+
+  // ON state
+  input:checked + .slider {
+    @apply bg-green-500;
+    
+    &::before {
+      transform: translateX(1.25rem);
+      content: '✓';
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $color-green;
+      font-weight: bold;
+      font-size: 0.75rem;
+    }
+  }
+
+  // Hover effects
+  &:hover {
+    .slider {
+      @apply bg-gray-300 dark:bg-gray-500;
+    }
+
+    input:checked + .slider {
+      @apply bg-green-600;
+    }
+  }
+
+  // Disabled state
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      .slider {
+        @apply bg-gray-200 dark:bg-gray-600;
+      }
+
+      input:checked + .slider {
+        @apply bg-green-500;
+      }
+    }
+  }
+}
+
+// Additional utility classes
+.toggle-switch-sm {
+  height: 1rem;
+  width: 1.75rem;
+
+  .slider {
+    height: 1rem;
+    width: 1.75rem;
+  }
+
+  .slider::before {
+    height: 0.75rem;
+    width: 0.75rem;
+  }
+
+  input:checked + .slider::before {
+    transform: translateX(0.75rem);
+  }
+}
+
+.toggle-switch-lg {
+  height: 2rem;
+  width: 3.5rem;
+
+  .slider {
+    height: 2rem;
+    width: 3.5rem;
+  }
+
+  .slider::before {
+    height: 1.5rem;
+    width: 1.5rem;
+  }
+
+  input:checked + .slider::before {
+    transform: translateX(1.5rem);
+  }
+} 

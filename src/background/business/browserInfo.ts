@@ -1,4 +1,4 @@
-import { EVENT_ACTION } from "../../constant";
+import { EVENT_ACTION } from "../../common/constant";
 import { IBrowserInfo } from "../types/background";
 import { getCachedBrowserInfo, setCachedBrowserInfo } from "../states/globalState";
 import { getSendMessageParams } from "../utils/utils";

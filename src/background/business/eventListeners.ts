@@ -1,5 +1,4 @@
-import { EVENT_ACTION, EVENT_TYPE } from "../../constant";
-import { BASE_CHATGPT_URL } from "../constants/constant";
+import { BASE_CHATGPT_URL, EVENT_ACTION, EVENT_TYPE } from "../../common/constant";
 import { sendConversation } from "../chatgpt/chatgpt";
 import { setCachedClientId } from "../states/globalState";
 import { clearChatGptHeaders, setChatGptHeaders } from "../helpers/headers";
@@ -22,10 +21,17 @@ export const startBackground = () => {
         ["requestHeaders"]
     );
 
-    chrome.runtime.onInstalled.addListener(async () => {
+    chrome.runtime.onInstalled.addListener(async (details) => {
         const cachedClientId = await initClientId();
         setCachedClientId(cachedClientId);
+
         console.log("ClientId initialized:", cachedClientId);
+
+        if (details.reason === 'install' || details.reason === 'update') {
+            chrome.tabs.create({
+                url: chrome.runtime.getURL('settings/index.html')
+            });
+        }
     });
 
     chrome.runtime.onStartup.addListener(async () => {
