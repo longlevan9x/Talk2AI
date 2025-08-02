@@ -9,9 +9,22 @@ export const startContent = (version: string) => {
 
         if (event.data.action === EVENT_ACTION.SEND_PROMPT) {
             try {
+                /**
+                 * @string prompt
+                 * @string promptType
+                 */
+                const payload = event.data.payload;
+
+                const _message = {
+                    ...{
+                        type: EVENT_TYPE.FROM_CONTENT,
+                        action: EVENT_ACTION.SEND_PROMPT,
+                    },
+                    ...payload
+                };
+
                 // Lỗi khi reinstall extension. Thao tác gửi từ page thì bị lỗi -> Chưa fix được. 
-                chrome.runtime.sendMessage(
-                    { type: EVENT_TYPE.FROM_CONTENT, action: EVENT_ACTION.SEND_PROMPT, prompt: event.data.payload.prompt },
+                chrome.runtime.sendMessage(_message,
                     (response) => {
                         if (response.error) {
                             // console.error("Error from background:", response.error);

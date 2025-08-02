@@ -1,10 +1,239 @@
-import { BASE_CHATGPT_URL, CHATGPT_BACKEND_API_URL, EVENT_ACTION, LOCAL_STORAGE_KEYS } from "../../common/constant";
+import { BASE_CHATGPT_URL, CHATGPT_BACKEND_API_URL, EVENT_ACTION, LOCAL_STORAGE_KEYS, LOCAL_STORAGE_PREFIX } from "../../common/constant";
 import { IGptHeaders, IChatPayload, IBrowserInfo } from "../types/background";
 import { getBrowserInfo } from "../business/browserInfo";
 import { getChatgptTabId, setChatgptTabId } from "../states/globalState";
 import { chromeTabSendMessage } from "../business/sendMessage";
-import { getLocalStorageGptKeys, getClientId, setLocalStorageGpt, setLocalStorageGptSplit } from "../states/storage";
+import { getLocalStorageGptKeys, getClientId, setLocalStorageGpt, setLocalStorageGptSplit, getSettingsSync, storageRemoveKeys } from "../states/storage";
 import { generateUUIDv4Str, sleep } from "../utils/utils";
+import { ISetting } from "../../common/types/setting";
+import { PROMPT_TYPE } from "../constants/constant";
+import { IConversationStorage } from "../types/converstaion";
+
+interface SettingInfo {
+    conversationId: string | undefined,
+    oldConversationId: string,
+    messageCount: number,
+    currentMessageId: string,
+    conversationIdKey: string,
+    currentMessageIdKey: string,
+    messageCountKey: string,
+    isHideConversation: boolean
+}
+
+export async function sendConversation(message: { prompt: string, promptType: string }): Promise<any> {
+    try {
+        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        const activeTabId = activeTab.id!;
+        const stored = await getLocalStorageGptKeys();
+        const settings = await getSettingsSync();
+
+        if (!await _ensureToken(stored, activeTabId)) {
+            return { error: "Thiếu token hoặc headers. Đang mở ChatGPT để lấy lại..." };
+        }
+
+        let settingInfo = _prepareSetting(settings, stored as IConversationStorage, message.promptType)
+
+        const newMessageId = generateUUIDv4Str();
+        const rawHeaders = getRequestHeader(stored.authorization);
+        const storageHeaders = getStorageHeader(stored);
+        let headers: IGptHeaders = { ...rawHeaders, ...storageHeaders, "Accept": "text/event-stream" };
+
+        if (settingInfo.isHideConversation) {
+            await hideConversation(settingInfo.oldConversationId, headers);
+            await storageRemoveKeys(LOCAL_STORAGE_PREFIX.CHATGPT, [settingInfo.conversationIdKey, settingInfo.currentMessageIdKey]);
+        }
+
+        const chatRequirementsToken = await postChatRequirements(headers);
+        headers["openai-sentinel-chat-requirements-token"] = chatRequirementsToken.token;
+
+        const proofToken = await getProofToken(chatRequirementsToken.proofofwork.seed, chatRequirementsToken.proofofwork.difficulty);
+        // console.log(proofToken);
+        if (!proofToken) {
+            // await chromeTabSendMessage(activeTabId, EVENT_ACTION.SSE_PART, { error: true, content: "Thiếu proofToken. Hãy thử lại..." }).catch((err) => {
+            //     console.log("SendMessage lỗi:", err);
+            // });
+
+            return { error: "Thiếu proofToken. Hãy thử lại..." };
+        }
+
+        headers["openai-sentinel-proof-token"] = proofToken;
+
+        const browserInfo = await getBrowserInfo();
+        const payload = _buildPayload(message, browserInfo, settingInfo.conversationId, settingInfo.currentMessageId, newMessageId);
+
+        const conversationRes = await fetch(`${CHATGPT_BACKEND_API_URL}/conversation`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(payload),
+            credentials: "include"
+        });
+
+        if (conversationRes.status === 401) {
+            openOrFocusChatGPTTab();
+            return { error: "Token expired, opened chatgpt.com to refresh token" };
+        }
+
+        const resContentType = conversationRes.headers.get("content-type");
+
+        if (conversationRes.status !== 200) {
+            let resJson: any = null;
+            if (resContentType === "application/json") {
+                resJson = await conversationRes.json();
+            }
+
+            await chromeTabSendMessage(activeTabId, EVENT_ACTION.SSE_PART, { error: true, content: resJson?.detail?.message || resJson?.detail }).catch((err) => {
+                console.log("SendMessage lỗi:", err);
+            });
+
+            return { success: false, error: resJson };
+        }
+
+        settingInfo.messageCount += 1;
+        setLocalStorageGptSplit(settingInfo.messageCountKey, settingInfo.messageCount);
+
+        const reader = conversationRes.body!.getReader();
+        await _handleStream(reader, activeTabId, settingInfo);
+
+        return { success: true };
+    } catch (error: any) {
+        console.log(error);
+        return { error: error.message || error };
+    }
+}
+
+export async function hideConversation(conversationId: string | undefined, headers: Record<string, string>) {
+    if (!conversationId) {
+        return null;
+    }
+
+    const payload = {
+        is_visible: false
+    };
+
+    const response = await fetch(`${CHATGPT_BACKEND_API_URL}/conversation/${conversationId}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify(payload),
+        credentials: "include"
+    });
+
+    if (!response.ok) {
+        let errorDetail = null;
+        try {
+            errorDetail = await response.json();
+            if (errorDetail?.detail) {
+                errorDetail = errorDetail.detail;
+            }
+
+        } catch {
+            errorDetail = await response.text();
+        }
+
+        throw new Error(errorDetail || "Failed to hide conversation");
+    }
+
+    return response.json();
+}
+
+export async function postChatRequirements(headers: Record<string, string>) {
+    const clientId = await getClientId();
+
+    const response = await fetch(`${CHATGPT_BACKEND_API_URL}/sentinel/chat-requirements`, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({
+            conversationMode: {
+                kind: "primary_assistant"
+            }
+        })
+    });
+
+    if (!response.ok) {
+        let errorDetail = null;
+        try {
+            errorDetail = await response.json();
+            if (errorDetail?.detail) {
+                errorDetail = errorDetail.detail;
+            }
+
+        } catch {
+            errorDetail = await response.text();
+        }
+
+        throw new Error(errorDetail || "Failed to fetch chat requirements");
+    }
+
+    return response.json();
+}
+
+export function getProofToken(secret: string, difficulty: number): Promise<string> {
+    return new Promise((resolve) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]?.id) {
+                chromeTabSendMessage(tabs[0].id, EVENT_ACTION.GET_PROOF_TOKEN, { params: [secret, difficulty] }).then(response => {
+                    resolve(response);
+                }).catch(err => {
+                    console.log("getProofToken err", err);
+                    resolve("");
+                })
+            } else {
+                resolve("");
+            }
+        });
+    });
+}
+
+function getStorageHeader(storage: any): IGptHeaders {
+    const headers: IGptHeaders = {};
+
+    headers["oai-client-version"] = storage.oaiClientVersion;
+
+    if (storage.userAgent) headers["User-Agent"] = storage.userAgent;
+    if (storage.oaiLanguage) headers["oai-language"] = storage.oaiLanguage;
+
+    storage["oai-device-id"] = storage.clientId;
+
+    return headers;
+}
+
+export function getRequestHeader(bearerToken: string): Record<string, string> {
+    if (bearerToken && !bearerToken.startsWith("Bearer ")) {
+        bearerToken = "Bearer " + bearerToken;
+    }
+
+    return {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `${bearerToken}`,
+        origin: BASE_CHATGPT_URL,
+        referer: `${BASE_CHATGPT_URL}/`
+    };
+}
+
+// Hàm tạo hoặc focus tab chatgpt.com để lấy token mới
+export function openOrFocusChatGPTTab(): void {
+    const chatgptTabId = getChatgptTabId();
+    if (chatgptTabId !== null) {
+        chrome.tabs.get(chatgptTabId, (tab) => {
+            if (chrome.runtime.lastError || !tab) {
+                createChatGPTTab();
+            } else {
+                chrome.tabs.reload(chatgptTabId!);
+                chrome.tabs.update(chatgptTabId!, { active: false });
+            }
+        });
+    } else {
+        createChatGPTTab();
+    }
+}
+
+export function createChatGPTTab(): void {
+    chrome.tabs.create({ url: BASE_CHATGPT_URL, active: false }, (tab) => {
+        if (tab.id !== undefined) {
+            setChatgptTabId(tab.id);
+        }
+    });
+}
 
 async function _ensureToken(stored: any, activeTabId: number): Promise<boolean> {
     if (!stored.authorization || !stored.oaiClientVersion) {
@@ -57,7 +286,7 @@ function _buildPayload(message: { prompt: string }, browserInfo: IBrowserInfo, c
     };
 }
 
-async function handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, activeTabId: number) {
+async function _handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, activeTabId: number, settingInfo: SettingInfo) {
     const decoder = new TextDecoder("utf-8");
     let buffer = "";
     let fullContent = "";
@@ -90,8 +319,8 @@ async function handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, act
             try {
                 const json = JSON.parse(dataStr);
 
-                if (json.v?.conversation_id) setLocalStorageGpt({ [LOCAL_STORAGE_KEYS.CONVERSATION_ID]: json.v.conversation_id });
-                if (json.v?.message?.id) setLocalStorageGpt({ [LOCAL_STORAGE_KEYS.CURRENT_MESSAGE_ID]: json.v.message.id });
+                if (json.v?.conversation_id) setLocalStorageGpt({ [settingInfo.conversationIdKey]: json.v.conversation_id });
+                if (json.v?.message?.id) setLocalStorageGpt({ [settingInfo.currentMessageIdKey]: json.v.message.id });
                 if (json.v?.message?.author?.role === "user") continue;
 
                 let delta: string | null = null;
@@ -115,176 +344,78 @@ async function handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, act
     return fullContent;
 }
 
-export async function sendConversation(message: { prompt: string }): Promise<any> {
-    try {
-        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        const activeTabId = activeTab.id!;
-        const stored = await getLocalStorageGptKeys();
+function _prepareSetting(settings: ISetting, stored: IConversationStorage, promptType: string): SettingInfo {
+    const rootMessageId = "client-created-root";
 
-        if (!await _ensureToken(stored, activeTabId)) {
-            return { error: "Thiếu token hoặc headers. Đang mở ChatGPT để lấy lại..." };
-        }
-
-        let conversationId = stored.conversation_id || null;
-        let currentMessageId = stored.current_message_id || "client-created-root";
-        let messageCount = stored.message_count ? parseInt(stored.message_count) : 0;
-
-        // max message in conversation = 10
-        if (messageCount > 10) {
-            // new conversation, new message
-            conversationId = null;
-            messageCount = 0;
-            currentMessageId = "client-created-root"
-        }
-
-        const newMessageId = generateUUIDv4Str();
-        const rawHeaders = getRequestHeader(stored.authorization);
-        const headers: IGptHeaders = { ...rawHeaders, "Accept": "text/event-stream" };
-        headers["oai-client-version"] = stored.oaiClientVersion;
-
-        if (stored.userAgent) headers["User-Agent"] = stored.userAgent;
-        if (stored.oaiLanguage) headers["oai-language"] = stored.oaiLanguage;
-
-        headers["oai-device-id"] = await getClientId();
-
-        const chatRequirementsToken = await postChatRequirements(headers);
-        headers["openai-sentinel-chat-requirements-token"] = chatRequirementsToken.token;
-
-        const proofToken = await getProofToken(chatRequirementsToken.proofofwork.seed, chatRequirementsToken.proofofwork.difficulty);
-        headers["openai-sentinel-proof-token"] = proofToken;
-
-        const browserInfo = await getBrowserInfo();
-        const payload = _buildPayload(message, browserInfo, conversationId, currentMessageId, newMessageId);
-
-        const conversationRes = await fetch(`${CHATGPT_BACKEND_API_URL}/conversation`, {
-            method: "POST",
-            headers,
-            body: JSON.stringify(payload),
-            credentials: "include"
-        });
-
-        if (conversationRes.status === 401) {
-            openOrFocusChatGPTTab();
-            return { error: "Token expired, opened chatgpt.com to refresh token" };
-        }
-
-        const resContentType = conversationRes.headers.get("content-type");
-
-        if (conversationRes.status !== 200) {
-            let resJson: any = null;
-            if (resContentType === "application/json") {
-                resJson = await conversationRes.json();
-            }
-
-            await chromeTabSendMessage(activeTabId, EVENT_ACTION.SSE_PART, { error: true, content: resJson?.detail?.message || resJson?.detail }).catch((err) => {
-                console.log("SendMessage lỗi:", err);
-            });
-
-            return { success: false, error: resJson };
-        }
-
-        messageCount += 1;
-        setLocalStorageGptSplit(LOCAL_STORAGE_KEYS.MESSAGE_COUNT, messageCount);
-
-        const reader = conversationRes.body!.getReader();
-        await handleStream(reader, activeTabId);
-
-        return { success: true };
-    } catch (error: any) {
-        console.log(error);
-        return { error: error.message || error };
-    }
-}
-
-export async function postChatRequirements(headers: Record<string, string>) {
-    const clientId = await getClientId();
-
-    const response = await fetch(`${CHATGPT_BACKEND_API_URL}/sentinel/chat-requirements`, {
-        method: "POST",
-        headers: {
-            ...headers,
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            "oai-device-id": clientId
+    // Mapping cho các loại prompt
+    const promptConfigs = {
+        [PROMPT_TYPE.TRAN]: {
+            prefix: "tran",
         },
-        body: JSON.stringify({
-            conversationMode: {
-                kind: "primary_assistant"
-            }
-        })
-    });
-
-    if (!response.ok) {
-        // Nếu không thành công, trả về object chứa thông tin lỗi
-        let errorDetail = null;
-        try {
-            errorDetail = await response.json();
-            if (errorDetail?.detail) {
-                errorDetail = errorDetail.detail;
-            }
-
-        } catch {
-            errorDetail = await response.text();
+        [PROMPT_TYPE.EXPLAIN]: {
+            prefix: "explain",
+        },
+        [PROMPT_TYPE.CUSTOM]: {
+            prefix: "custom",
         }
+    };
 
-        throw new Error(errorDetail || "Failed to fetch chat requirements");
+    let prefix = "";
+
+    if (settings.splitConversation) {
+        const config = promptConfigs[promptType as keyof typeof promptConfigs];
+        prefix = config.prefix;
     }
 
-    return response.json();
-}
+    // Lấy config cho prompt type hiện tại hoặc default
+    const _stored = stored as any;
+    const _settings = settings as any;
 
-// Hàm tạo hoặc focus tab chatgpt.com để lấy token mới
-export function openOrFocusChatGPTTab(): void {
-    const chatgptTabId = getChatgptTabId();
-    if (chatgptTabId !== null) {
-        chrome.tabs.get(chatgptTabId, (tab) => {
-            if (chrome.runtime.lastError || !tab) {
-                createChatGPTTab();
-            } else {
-                chrome.tabs.reload(chatgptTabId!);
-                chrome.tabs.update(chatgptTabId!, { active: false });
-            }
-        });
-    } else {
-        createChatGPTTab();
-    }
-}
+    // Sử dụng hàm buildKey để tạo các key
+    let conversationId = _stored[_buildKey(prefix, "conversation_id")] || undefined;
+    let currentMessageId = _stored[_buildKey(prefix, "current_message_id")] || rootMessageId;
+    let messageCount = _stored[_buildKey(prefix, "message_count")] ? parseInt(_stored[_buildKey(prefix, "message_count")]) : 0;
+    let isHideConversation = _settings[_buildKey(prefix, "isHideConversation", true)]; // isCamelCase = true
+    const maxCount = _settings[_buildKey(prefix, "messageCount", true)]; // isCamelCase = true
+    let conversationIdKey = _buildKey(prefix, "conversation_id");
+    let currentMessageIdKey = _buildKey(prefix, "current_message_id");
+    let messageCountKey = _buildKey(prefix, "message_count");
 
-export function createChatGPTTab(): void {
-    chrome.tabs.create({ url: BASE_CHATGPT_URL, active: false }, (tab) => {
-        if (tab.id !== undefined) {
-            setChatgptTabId(tab.id);
-        }
-    });
-}
+    let oldConversationId = conversationId;
+    let _isHideConversation = false;
 
-export function getProofToken(secret: string, difficulty: number): Promise<string> {
-    return new Promise((resolve) => {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs[0]?.id) {
-                chromeTabSendMessage(tabs[0].id, EVENT_ACTION.GET_PROOF_TOKEN, { params: [secret, difficulty] }).then(response => {
-                    resolve(response);
-                }).catch(err => {
-                    console.log("getProofToken err", err);
-                    resolve("");
-                })
-            } else {
-                resolve("");
-            }
-        });
-    });
-}
-
-
-export function getRequestHeader(bearerToken: string): Record<string, string> {
-    if (bearerToken && !bearerToken.startsWith("Bearer ")) {
-        bearerToken = "Bearer " + bearerToken;
+    // Kiểm tra nếu đã vượt quá giới hạn
+    if (messageCount > maxCount) {
+        conversationId = undefined;
+        currentMessageId = rootMessageId;
+        messageCount = 0;
+        _isHideConversation = isHideConversation ? true : false;
     }
 
     return {
-        "Content-Type": "application/json",
-        Authorization: `${bearerToken}`,
-        origin: BASE_CHATGPT_URL,
-        referer: `${BASE_CHATGPT_URL}/`
+        conversationId,
+        oldConversationId: oldConversationId,
+        messageCount,
+        currentMessageId,
+        conversationIdKey: conversationIdKey,
+        currentMessageIdKey: currentMessageIdKey,
+        messageCountKey: messageCountKey,
+        isHideConversation: _isHideConversation
     };
+}
+
+// Thêm hàm utility này vào đầu file hoặc tạo file utils riêng
+function _buildKey(prefix: string, key: string, isCamelCase: boolean = false): string {
+    if (!prefix) {
+        return key;
+    }
+
+    if (isCamelCase) {
+        // Chuyển ký tự đầu của key thành uppercase
+        const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+        return prefix + capitalizedKey;
+    }
+
+    // Nối prefix với key bằng underscore
+    return prefix + "_" + key;
 }

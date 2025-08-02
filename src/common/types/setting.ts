@@ -1,12 +1,15 @@
 export interface ISetting {
     messageCount: number
     splitConversation: boolean
-    deleteConversation: boolean
+    isHideConversation: boolean
     explainConversation: string
     explainMessageCount: number
-    deleteExplainConversation: boolean
-    translateConversation: string
-    translateMessageCount: number
-    deleteTranConversation: boolean
+    explainIsHideConversation: boolean
+    tranConversation: string
+    tranMessageCount: number
+    tranIsHideConversation: boolean
     theme: 'light' | 'dark' | 'system'
+    customConversation: string,
+    customMessageCount: number
+    customIsHideConversation: boolean,
 }

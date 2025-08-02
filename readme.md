@@ -123,6 +123,6 @@ Nếu lỗi vẫn tiếp tục xảy ra:
 ---
 
 📫 **Liên hệ phát triển**: [email@example.com]
-🌐 **Phiên bản**: 1.0.1  
+🌐 **Phiên bản**: 1.0.4  
 
 ---

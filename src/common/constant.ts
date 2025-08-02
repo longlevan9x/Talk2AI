@@ -36,5 +36,7 @@ export const LOCAL_STORAGE_KEYS = {
     CONVERSATION_ID: "conversation_id",
     CURRENT_MESSAGE_ID: "current_message_id",
     MESSAGE_COUNT: "message_count",
+    EXPLAIN_MESSAGE_COUNT: "explain_message_count",
+    TRAN_MESSAGE_COUNT: "tran_message_count",
     SETTINGS: "settings"
 };

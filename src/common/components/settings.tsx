@@ -2,19 +2,7 @@ import React, { useState, useEffect } from 'react'
 import '../../styles.scss'
 import { ISetting } from '../types/setting'
 import { LOCAL_STORAGE_KEYS } from '../constant'
-
-const defaultSettings: ISetting = {
-    messageCount: 10,
-    splitConversation: false,
-    deleteConversation: false,
-    explainConversation: "explain",
-    explainMessageCount: 10,
-    deleteExplainConversation: false,
-    translateConversation: "tran",
-    translateMessageCount: 10,
-    deleteTranConversation: false,
-    theme: 'system', // Mặc định theo system
-}
+import { defaultSettings } from '../config'
 
 export enum PageType {
     POPUP = 'popup',
@@ -237,8 +225,8 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                                     <label className="toggle-switch toggle-switch-lg">
                                         <input
                                             type="checkbox"
-                                            checked={tempSettings.deleteConversation}
-                                            onChange={() => handleToggle('deleteConversation')}
+                                            checked={tempSettings.isHideConversation}
+                                            onChange={() => handleToggle('isHideConversation')}
                                         />
                                         <span className="slider"></span>
                                     </label>
@@ -280,8 +268,8 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                                         <label className="toggle-switch toggle-switch-lg">
                                             <input
                                                 type="checkbox"
-                                                checked={tempSettings.deleteExplainConversation}
-                                                onChange={() => handleToggle('deleteExplainConversation')}
+                                                checked={tempSettings.explainIsHideConversation}
+                                                onChange={() => handleToggle('explainIsHideConversation')}
                                             />
                                             <span className="slider"></span>
                                         </label>
@@ -304,8 +292,8 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                                             type="number"
                                             min="1"
                                             max="50"
-                                            value={tempSettings.translateMessageCount}
-                                            onChange={(e) => handleNumberChange('translateMessageCount', parseInt(e.target.value) || 1)}
+                                            value={tempSettings.tranMessageCount}
+                                            onChange={(e) => handleNumberChange('tranMessageCount', parseInt(e.target.value) || 1)}
                                             className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xs text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
                                         />
                                     </div>
@@ -318,8 +306,46 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                                         <label className="toggle-switch toggle-switch-lg">
                                             <input
                                                 type="checkbox"
-                                                checked={tempSettings.deleteTranConversation}
-                                                onChange={() => handleToggle('deleteTranConversation')}
+                                                checked={tempSettings.tranIsHideConversation}
+                                                onChange={() => handleToggle('tranIsHideConversation')}
+                                            />
+                                            <span className="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4 pb-2 border-b border-gray-200 dark:border-gray-600">
+                                    Hội thoại tùy chỉnh
+                                </h2>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                                        <div className="flex-1 mr-4">
+                                            <label className="text-base block font-medium text-gray-900 dark:text-gray-200 mb-1">Số tin nhắn</label>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">Số lượng tin nhắn tối đa trong hội thoại</span>
+                                        </div>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="50"
+                                            value={tempSettings.customMessageCount}
+                                            onChange={(e) => handleNumberChange('customMessageCount', parseInt(e.target.value) || 1)}
+                                            className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xs text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                                        <div className="flex-1 mr-4">
+                                            <label className="text-base block font-medium text-gray-900 dark:text-gray-200 mb-1">Xóa hội thoại khi đạt giới hạn</label>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400">Tự động xóa hội thoại cũ khi đạt số tin nhắn tối đa</span>
+                                        </div>
+                                        <label className="toggle-switch toggle-switch-lg">
+                                            <input
+                                                type="checkbox"
+                                                checked={tempSettings.customIsHideConversation}
+                                                onChange={() => handleToggle('customIsHideConversation')}
                                             />
                                             <span className="slider"></span>
                                         </label>
@@ -344,7 +370,7 @@ export default function Settings({ className, pageType = PageType.POPUP }: ISett
                             <div className="text-sm text-gray-600 dark:text-gray-400">Tin nhắn giải thích</div>
                         </div>
                         <div className="text-center p-4 bg-white dark:bg-gray-700 rounded-xs border border-gray-200 dark:border-gray-600">
-                            <div className="text-2xl font-bold text-orange-600">{tempSettings.translateMessageCount}</div>
+                            <div className="text-2xl font-bold text-orange-600">{tempSettings.tranMessageCount}</div>
                             <div className="text-sm text-gray-600 dark:text-gray-400">Tin nhắn dịch</div>
                         </div>
                         <div className="text-center p-4 bg-white dark:bg-gray-700 rounded-xs border border-gray-200 dark:border-gray-600">

@@ -1,4 +1,6 @@
+import { defaultSettings } from "../../common/config";
 import { LOCAL_STORAGE_PREFIX, LOCAL_STORAGE_KEYS } from "../../common/constant";
+import { ISetting } from "../../common/types/setting";
 import { IStorageItems } from "../types/background";
 import { gptConvertStorageKey, getChatGPTLocalStoragePrefixKey, generateUUIDv4Str } from "../utils/utils";
 
@@ -44,6 +46,17 @@ export async function storageRemoveKeyPrefix(prefix: string): Promise<void> {
     }
 }
 
+export async function storageRemoveKeys(prefix: string, key: string | string[]): Promise<void> {
+    if (Array.isArray(key)) {
+        key = key.map((k) => prefix + "_" + k);
+    }
+    else {
+        key = prefix + "_" + key;
+    }
+
+    await chrome.storage.local.remove(key);
+}
+
 export function getLocalStorageSync(key: string | string[] | null): Promise<Record<string, any>> {
     return new Promise((resolve, reject) => {
         chrome.storage.local.get(key, (result) => {
@@ -81,4 +94,14 @@ export function setLocalStorageGpt(items: { [key: string]: any }) {
 
 export function setLocalStorageGptSplit(key: string, value: any) {
     setLocalStorageGpt({ [key]: value });
+}
+
+export async function getSettingsSync(): Promise<ISetting> {
+    const storage = await getLocalStorageSync(LOCAL_STORAGE_KEYS.SETTINGS);
+
+    if (!storage?.settings) {
+        return defaultSettings;
+    }
+
+    return storage.settings;
 }
