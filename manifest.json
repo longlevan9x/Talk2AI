@@ -1,0 +1,48 @@
+{
+    "name": "Talk2AI – Effortless AI communication ",
+    "description": "Talk2AI lets you send content directly to powerful AI platforms like ChatGPT, Claude, or Gemini with a single click.",
+    "version": "1.0.4",
+    "manifest_version": 3,
+    "icons": {
+        "16": "assets/logo/logo.png",
+        "32": "assets/logo/logo.png",
+        "48": "assets/logo/logo.png",
+        "128": "assets/logo/logo.png"
+    },
+    "permissions": [
+        "webRequest",
+        "storage",
+        "tabs",
+        "scripting"
+    ],
+    "host_permissions": [
+        "https://chatgpt.com/*",
+        "https://*.chatgpt.com/*",
+        "https://nextjs-practice-exam.vercel.app/*",
+        "http://localhost:3000/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup/index.html",
+        "default_icon": {
+            "16": "assets/logo/logo.png",
+            "32": "assets/logo/logo.png",
+            "48": "assets/logo/logo.png",
+            "128": "assets/logo/logo.png"
+        }
+    },
+    "options_page": "settings/index.html",
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start"
+        }
+    ]
+}
