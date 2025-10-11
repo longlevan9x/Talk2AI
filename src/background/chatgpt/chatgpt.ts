@@ -319,22 +319,33 @@ async function _handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, ac
             try {
                 const json = JSON.parse(dataStr);
 
-                if (json.v?.conversation_id) setLocalStorageGpt({ [settingInfo.conversationIdKey]: json.v.conversation_id });
-                if (json.v?.message?.id) setLocalStorageGpt({ [settingInfo.currentMessageIdKey]: json.v.message.id });
-                if (json.v?.message?.author?.role === "user") continue;
-
-                let delta: string | null = null;
-                if (json.v?.message?.content?.parts?.length > 0) delta = json.v.message.content.parts[0];
-                else if (typeof json.v === "string") delta = json.v;
-                else if (json.p && json.o === "append" && typeof json.v === "string") delta = json.v;
-                else if (json?.o === "patch" && Array.isArray(json.v)) {
-                    const jsonV = json.v[0];
-                    if (jsonV.o === "append" && typeof jsonV.v === "string") delta = jsonV.v;
+                // 2025-10-11: Response json của message từ 1 object -> thành 1 array các object
+                
+                let jsonArray = [];
+                if (Array.isArray(json?.v)) {
+                    jsonArray = json.v;
+                } else if (json?.message) {
+                    jsonArray = [json];
                 }
 
-                if (delta) {
-                    fullContent += delta;
-                    await chromeTabSendMessage(activeTabId, EVENT_ACTION.SSE_PART, { content: delta });
+                for (const jsonItem of jsonArray) {
+                    if (jsonItem.v?.conversation_id) setLocalStorageGpt({ [settingInfo.conversationIdKey]: jsonItem.v.conversation_id });
+                    if (jsonItem.v?.message?.id) setLocalStorageGpt({ [settingInfo.currentMessageIdKey]: jsonItem.v.message.id });
+                    if (jsonItem.v?.message?.author?.role === "user") continue;
+
+                    let delta: string | null = null;
+                    if (jsonItem.v?.message?.content?.parts?.length > 0) delta = jsonItem.v.message.content.parts[0];
+                    else if (typeof jsonItem.v === "string") delta = jsonItem.v;
+                    else if (jsonItem.p && jsonItem.o === "append" && typeof jsonItem.v === "string") delta = jsonItem.v;
+                    else if (jsonItem?.o === "patch" && Array.isArray(jsonItem.v)) {
+                        const jsonItemV = jsonItem.v[0];
+                        if (jsonItemV.o === "append" && typeof jsonItemV.v === "string") delta = jsonItemV.v;
+                    }
+
+                    if (delta) {
+                        fullContent += delta;
+                        await chromeTabSendMessage(activeTabId, EVENT_ACTION.SSE_PART, { content: delta });
+                    }
                 }
             } catch (err) {
                 console.warn("Có lỗi xảy ra:", err);
