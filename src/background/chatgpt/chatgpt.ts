@@ -8,17 +8,7 @@ import { generateUUIDv4Str, sleep } from "../utils/utils";
 import { ISetting } from "../../common/types/setting";
 import { PROMPT_TYPE } from "../constants/constant";
 import { IConversationStorage } from "../types/converstaion";
-
-interface SettingInfo {
-    conversationId: string | undefined,
-    oldConversationId: string,
-    messageCount: number,
-    currentMessageId: string,
-    conversationIdKey: string,
-    currentMessageIdKey: string,
-    messageCountKey: string,
-    isHideConversation: boolean
-}
+import { ISettingInfo } from "../types/settingInfomation";
 
 export async function sendConversation(message: { prompt: string, promptType: string }): Promise<any> {
     try {
@@ -94,7 +84,7 @@ export async function sendConversation(message: { prompt: string, promptType: st
         const reader = conversationRes.body!.getReader();
         await _handleStream(reader, activeTabId, settingInfo);
 
-        return { success: true };
+        return { success: true, message: "[DONE]" };
     } catch (error: any) {
         console.log(error);
         return { error: error.message || error };
@@ -286,7 +276,7 @@ function _buildPayload(message: { prompt: string }, browserInfo: IBrowserInfo, c
     };
 }
 
-async function _handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, activeTabId: number, settingInfo: SettingInfo) {
+async function _handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, activeTabId: number, settingInfo: ISettingInfo) {
     const decoder = new TextDecoder("utf-8");
     let buffer = "";
     let fullContent = "";
@@ -320,7 +310,7 @@ async function _handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, ac
                 const json = JSON.parse(dataStr);
 
                 // 2025-10-11: Response json của message từ 1 object -> thành 1 array các object
-                
+
                 let jsonArray = [];
                 if (Array.isArray(json?.v)) {
                     jsonArray = json.v;
@@ -335,8 +325,12 @@ async function _handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, ac
 
                     let delta: string | null = null;
                     if (jsonItem.v?.message?.content?.parts?.length > 0) delta = jsonItem.v.message.content.parts[0];
-                    else if (typeof jsonItem.v === "string") delta = jsonItem.v;
-                    else if (jsonItem.p && jsonItem.o === "append" && typeof jsonItem.v === "string") delta = jsonItem.v;
+                    // else if (typeof jsonItem.v === "string") {
+                    //     delta = jsonItem.v;
+                    // }
+                    else if (jsonItem.p && jsonItem.o === "append" && typeof jsonItem.v === "string") {
+                        delta = jsonItem.v;
+                    }
                     else if (jsonItem?.o === "patch" && Array.isArray(jsonItem.v)) {
                         const jsonItemV = jsonItem.v[0];
                         if (jsonItemV.o === "append" && typeof jsonItemV.v === "string") delta = jsonItemV.v;
@@ -352,10 +346,11 @@ async function _handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, ac
             }
         }
     }
+
     return fullContent;
 }
 
-function _prepareSetting(settings: ISetting, stored: IConversationStorage, promptType: string): SettingInfo {
+function _prepareSetting(settings: ISetting, stored: IConversationStorage, promptType: string): ISettingInfo {
     const rootMessageId = "client-created-root";
 
     // Mapping cho các loại prompt

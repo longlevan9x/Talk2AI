@@ -23,6 +23,7 @@ export const startContent = (version: string) => {
                     ...payload
                 };
 
+                // Send a message to the background script
                 // Lỗi khi reinstall extension. Thao tác gửi từ page thì bị lỗi -> Chưa fix được. 
                 chrome.runtime.sendMessage(_message,
                     (response) => {
@@ -35,6 +36,10 @@ export const startContent = (version: string) => {
                         if (chrome.runtime.lastError) {
                             sendFromExtMessageToWebsite(EVENT_ACTION.EXT_LOST_CONNECTION);
                         } else {
+                            if (response.success) {
+                                // Gửi tín hiệu hoàn thành
+                                sendFromExtMessageToWebsite(EVENT_ACTION.GPT_STREAM_DONE, { content: response.message || "" });
+                            }
                             // console.log("Phản hồi từ background:", response);
                         }
                     }
@@ -47,6 +52,9 @@ export const startContent = (version: string) => {
         }
         else if (event.data.action === EVENT_ACTION.EXT_CHECK) {
             sendFromExtMessageToWebsite(EVENT_ACTION.EXT_PRESENT, { version: version })
+        }
+        else if (event.data.action === EVENT_ACTION.PING) {
+            sendFromExtMessageToWebsite(EVENT_ACTION.PONG);
         }
     });
 
