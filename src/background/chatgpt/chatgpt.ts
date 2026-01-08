@@ -86,7 +86,7 @@ export async function sendConversation(message: { prompt: string, promptType: st
 
         return { success: true, message: "[DONE]" };
     } catch (error: any) {
-        console.log(error);
+        console.log("sendConversation Error: ", error);
         return { error: error.message || error };
     }
 }
@@ -140,17 +140,18 @@ export async function postChatRequirements(headers: Record<string, string>) {
 
     if (!response.ok) {
         let errorDetail = null;
+
         try {
             errorDetail = await response.json();
             if (errorDetail?.detail) {
                 errorDetail = errorDetail.detail;
             }
-
         } catch {
             errorDetail = await response.text();
+            throw new Error(errorDetail || "Failed to fetch chat requirements");
         }
 
-        throw new Error(errorDetail || "Failed to fetch chat requirements");
+        throw errorDetail?.error || errorDetail;
     }
 
     return response.json();
@@ -314,7 +315,7 @@ async function _handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, ac
                 let jsonArray = [];
                 if (Array.isArray(json?.v)) {
                     jsonArray = json.v;
-                } else if (json?.message) {
+                } else if (json?.message || json?.v) {
                     jsonArray = [json];
                 }
 
@@ -324,16 +325,20 @@ async function _handleStream(reader: ReadableStreamDefaultReader<Uint8Array>, ac
                     if (jsonItem.v?.message?.author?.role === "user") continue;
 
                     let delta: string | null = null;
-                    if (jsonItem.v?.message?.content?.parts?.length > 0) delta = jsonItem.v.message.content.parts[0];
-                    // else if (typeof jsonItem.v === "string") {
-                    //     delta = jsonItem.v;
-                    // }
+                    if (jsonItem.v?.message?.content?.parts?.length > 0) {
+                        delta = jsonItem.v.message.content.parts[0];
+                    }
+                    else if (typeof jsonItem.v === "string" && !jsonItem.o) {
+                        delta = jsonItem.v;
+                    }
                     else if (jsonItem.p && jsonItem.o === "append" && typeof jsonItem.v === "string") {
                         delta = jsonItem.v;
                     }
                     else if (jsonItem?.o === "patch" && Array.isArray(jsonItem.v)) {
                         const jsonItemV = jsonItem.v[0];
-                        if (jsonItemV.o === "append" && typeof jsonItemV.v === "string") delta = jsonItemV.v;
+                        if (jsonItemV.o === "append" && typeof jsonItemV.v === "string") {
+                            delta = jsonItemV.v;
+                        }
                     }
 
                     if (delta) {
